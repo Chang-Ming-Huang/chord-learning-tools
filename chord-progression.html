@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和弦進行練習器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1e293b;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .left-panel {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            background: #475569;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+        }
+
+        select:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .control-btn {
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 15px;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .control-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #fff;
+        }
+
+        .progression-display {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .progression-name {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .chord-sequence {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .chord-card {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e293b;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-width: 80px;
+            border: 2px solid transparent;
+        }
+
+        .chord-card:hover {
+            background: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chord-card.playing {
+            background: #ea580c;
+            color: #ffffff;
+            border-color: #c2410c;
+            box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
+            transform: scale(1.1);
+        }
+
+        .chord-symbol {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .chord-numeral {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .templates {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .template-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .template-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .template-card.selected {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+        }
+
+        .template-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .play-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .play-btn {
+            background: #ea580c;
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        }
+
+        .play-btn:hover {
+            background: #c2410c;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(194, 65, 12, 0.4);
+        }
+
+        .play-btn.playing {
+            background: #10b981;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ea580c, #10b981);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div class="left-panel">
+                <h1 class="title">和弦進行練習器</h1>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <div class="control-label">調性</div>
+                        <select id="key-select">
+                            <option value="C">C 大調</option>
+                            <option value="G">G 大調</option>
+                            <option value="D">D 大調</option>
+                            <option value="A">A 大調</option>
+                            <option value="E">E 大調</option>
+                            <option value="F">F 大調</option>
+                            <option value="Am">A 小調</option>
+                            <option value="Em">E 小調</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">速度</div>
+                        <select id="tempo-select">
+                            <option value="60">慢速 (60 BPM)</option>
+                            <option value="80" selected>中速 (80 BPM)</option>
+                            <option value="100">快速 (100 BPM)</option>
+                            <option value="120">很快 (120 BPM)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="progression-display">
+                    <div class="progression-name" id="progression-name">vi-IV-I-V 進行</div>
+                    <div class="chord-sequence" id="chord-sequence">
+                        <!-- 和弦將由 JavaScript 生成 -->
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="play-controls">
+                    <button class="play-btn" id="play-btn" onclick="togglePlayback()">播放進行</button>
+                    <button class="control-btn" onclick="stopPlayback()">停止</button>
+                </div>
+
+                <div class="templates">
+            <div class="template-card selected" data-template="vi-IV-I-V">
+                <div class="template-name">vi-IV-I-V 進行</div>
+                <div class="template-description">最經典的流行音樂進行，感情豐富</div>
+            </div>
+
+            <div class="template-card" data-template="I-V-vi-IV">
+                <div class="template-name">I-V-vi-IV 進行</div>
+                <div class="template-description">明亮上揚的進行，常用於副歌</div>
+            </div>
+
+            <div class="template-card" data-template="ii-V-I">
+                <div class="template-name">ii-V-I 進行</div>
+                <div class="template-description">爵士樂的基石，經典終止式</div>
+            </div>
+
+            <div class="template-card" data-template="I-vi-ii-V">
+                <div class="template-name">I-vi-ii-V 進行</div>
+                <div class="template-description">圓滑的循環進行</div>
+            </div>
+
+            <div class="template-card" data-template="vi-ii-V-I">
+                <div class="template-name">vi-ii-V-I 進行</div>
+                <div class="template-description">從小調開始的解決進行</div>
+            </div>
+
+            <div class="template-card" data-template="I-IV-V-I">
+                <div class="template-name">I-IV-V-I 進行</div>
+                <div class="template-description">古典的正格終止</div>
+            </div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="piano-container">
+                <!-- Piano component will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="piano-component.js"></script>
+    <script>
+        const progressions = {
+            'vi-IV-I-V': {
+                name: 'vi-IV-I-V 進行',
+                chords: ['vi', 'IV', 'I', 'V'],
+                description: '最經典的流行音樂進行'
+            },
+            'I-V-vi-IV': {
+                name: 'I-V-vi-IV 進行',
+                chords: ['I', 'V', 'vi', 'IV'],
+                description: '明亮上揚的進行'
+            },
+            'ii-V-I': {
+                name: 'ii-V-I 進行',
+                chords: ['ii', 'V', 'I'],
+                description: '爵士樂基石'
+            },
+            'I-vi-ii-V': {
+                name: 'I-vi-ii-V 進行',
+                chords: ['I', 'vi', 'ii', 'V'],
+                description: '圓滑循環進行'
+            },
+            'vi-ii-V-I': {
+                name: 'vi-ii-V-I 進行',
+                chords: ['vi', 'ii', 'V', 'I'],
+                description: '小調解決進行'
+            },
+            'I-IV-V-I': {
+                name: 'I-IV-V-I 進行',
+                chords: ['I', 'IV', 'V', 'I'],
+                description: '古典正格終止'
+            }
+        };
+
+        const keyChords = {
+            'C': { 'I': 'C', 'ii': 'Dm', 'IV': 'F', 'V': 'G', 'vi': 'Am' },
+            'G': { 'I': 'G', 'ii': 'Am', 'IV': 'C', 'V': 'D', 'vi': 'Em' },
+            'D': { 'I': 'D', 'ii': 'Em', 'IV': 'G', 'V': 'A', 'vi': 'Bm' },
+            'A': { 'I': 'A', 'ii': 'Bm', 'IV': 'D', 'V': 'E', 'vi': 'F#m' },
+            'E': { 'I': 'E', 'ii': 'F#m', 'IV': 'A', 'V': 'B', 'vi': 'C#m' },
+            'F': { 'I': 'F', 'ii': 'Gm', 'IV': 'Bb', 'V': 'C', 'vi': 'Dm' },
+            'Am': { 'i': 'Am', 'ii': 'Bm', 'III': 'C', 'iv': 'Dm', 'V': 'E', 'VI': 'F', 'VII': 'G' },
+            'Em': { 'i': 'Em', 'ii': 'F#m', 'III': 'G', 'iv': 'Am', 'V': 'B', 'VI': 'C', 'VII': 'D' }
+        };
+
+        const chordFrequencies = {
+            'C': [261.63, 329.63, 392.00], 'Dm': [293.66, 349.23, 440.00],
+            'F': [349.23, 440.00, 523.25], 'G': [392.00, 493.88, 587.33],
+            'Am': [220.00, 261.63, 329.63], 'Em': [329.63, 392.00, 493.88],
+            'D': [293.66, 369.99, 440.00], 'A': [220.00, 277.18, 329.63],
+            'E': [329.63, 415.30, 493.88], 'Bm': [246.94, 293.66, 369.99],
+            'Bb': [233.08, 293.66, 349.23], 'Gm': [392.00, 466.16, 587.33],
+            'B': [246.94, 311.13, 369.99], 'F#m': [185.00, 220.00, 277.18],
+            'C#m': [277.18, 329.63, 415.30]
+        };
+
+        let pianoComponent;
+
+        let audioContext;
+        let isPlaying = false;
+        let currentTemplate = 'vi-IV-I-V';
+        let currentChordIndex = 0;
+        let playbackInterval;
+        let progressInterval;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+
+        function updateProgression() {
+            const key = document.getElementById('key-select').value;
+            const progression = progressions[currentTemplate];
+            const chordSequence = document.getElementById('chord-sequence');
+
+            document.getElementById('progression-name').textContent = progression.name;
+            chordSequence.innerHTML = '';
+
+            progression.chords.forEach((numeral, index) => {
+                const chordSymbol = keyChords[key][numeral] || numeral;
+                const chordCard = document.createElement('div');
+                chordCard.className = 'chord-card';
+                chordCard.dataset.index = index;
+                chordCard.onclick = () => {
+                    playChord(chordSymbol);
+                    pianoComponent.updateChord(chordSymbol);
+                };
+
+                chordCard.innerHTML = `
+                    <div class="chord-symbol">${chordSymbol}</div>
+                    <div class="chord-numeral">${numeral}</div>
+                `;
+
+                chordSequence.appendChild(chordCard);
+            });
+
+            // 初始顯示第一個和弦
+            if (progression.chords.length > 0) {
+                const firstChord = keyChords[key][progression.chords[0]] || progression.chords[0];
+                pianoComponent.updateChord(firstChord);
+            }
+        }
+
+
+        function playChord(chordSymbol) {
+            if (!audioContext || !chordFrequencies[chordSymbol]) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const frequencies = chordFrequencies[chordSymbol];
+
+            frequencies.forEach((freq, index) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 2);
+                }, index * 50);
+            });
+        }
+
+        function togglePlayback() {
+            if (isPlaying) {
+                stopPlayback();
+            } else {
+                startPlayback();
+            }
+        }
+
+        function startPlayback() {
+            if (!audioContext) return;
+
+            isPlaying = true;
+            currentChordIndex = 0;
+
+            const playBtn = document.getElementById('play-btn');
+            playBtn.textContent = '停止播放';
+            playBtn.classList.add('playing');
+
+            const tempo = parseInt(document.getElementById('tempo-select').value);
+            const interval = (60 / tempo) * 1000; // 每個和弦的持續時間
+
+            playCurrentChord();
+
+            playbackInterval = setInterval(() => {
+                currentChordIndex = (currentChordIndex + 1) % progressions[currentTemplate].chords.length;
+                playCurrentChord();
+            }, interval);
+
+            // 進度條動畫
+            startProgressBar(interval);
+        }
+
+        function playCurrentChord() {
+            const key = document.getElementById('key-select').value;
+            const progression = progressions[currentTemplate];
+            const numeral = progression.chords[currentChordIndex];
+            const chordSymbol = keyChords[key][numeral] || numeral;
+
+            // 清除之前的高亮
+            document.querySelectorAll('.chord-card').forEach(card => {
+                card.classList.remove('playing');
+            });
+
+            // 高亮當前和弦
+            const currentCard = document.querySelector(`[data-index="${currentChordIndex}"]`);
+            if (currentCard) {
+                currentCard.classList.add('playing');
+            }
+
+            // 更新右側面板
+            pianoComponent.updateChord(chordSymbol);
+
+            playChord(chordSymbol);
+        }
+
+        function startProgressBar(interval) {
+            const progressFill = document.getElementById('progress-fill');
+            const chordCount = progressions[currentTemplate].chords.length;
+
+            progressInterval = setInterval(() => {
+                const progress = ((currentChordIndex + 1) / chordCount) * 100;
+                progressFill.style.width = progress + '%';
+            }, interval);
+        }
+
+        function stopPlayback() {
+            isPlaying = false;
+            currentChordIndex = 0;
+
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+
+            const playBtn = document.getElementById('play-btn');
+            playBtn.textContent = '播放進行';
+            playBtn.classList.remove('playing');
+
+            document.querySelectorAll('.chord-card').forEach(card => {
+                card.classList.remove('playing');
+            });
+
+            document.getElementById('progress-fill').style.width = '0%';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+
+            // 初始化鋼琴元件
+            pianoComponent = new PianoComponent('piano-container', {
+                audioContext: audioContext
+            });
+
+            updateProgression();
+
+            document.getElementById('key-select').addEventListener('change', updateProgression);
+
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+
+                    currentTemplate = card.dataset.template;
+                    stopPlayback();
+                    updateProgression();
+                });
+            });
+        });
+
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

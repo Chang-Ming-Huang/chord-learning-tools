@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式和弦理論教學</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1e293b;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .left-panel {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            background: #475569;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .lesson-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 15px;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .nav-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.active {
+            background: #ea580c;
+            border-color: #c2410c;
+        }
+
+        .lesson-content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .lesson-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        .chord-builder {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .builder-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .note-selector {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .note-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: #fff;
+            padding: 0.8rem 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .note-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .note-btn.selected {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: #fff;
+        }
+
+        .chord-type-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .type-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .type-btn:hover, .type-btn.selected {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: #fff;
+        }
+
+        .chord-analysis {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .chord-display {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .interval-analysis {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .interval-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .interval-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #4ecdc4;
+        }
+
+        .interval-note {
+            font-size: 1.2rem;
+            color: #fff;
+        }
+
+        .inversion-section {
+            margin-top: 2rem;
+        }
+
+        .inversion-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .inversion-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .inversion-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .inversion-card.playing {
+            border-color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        .inversion-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .inversion-notes {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .circle-of-fifths {
+            width: 300px;
+            height: 300px;
+            margin: 2rem auto;
+            position: relative;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .key-point {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .key-point:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .key-point.selected {
+            background: rgba(255, 107, 107, 0.5);
+            border-color: #ff6b6b;
+        }
+
+        .play-chord-btn {
+            background: #ea580c;
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 1rem auto;
+            display: block;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        }
+
+        .play-chord-btn:hover {
+            background: #c2410c;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(194, 65, 12, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .chord-builder {
+                grid-template-columns: 1fr;
+            }
+
+            .interval-analysis {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div class="left-panel">
+                <h1 class="title">互動式和弦理論教學</h1>
+
+                <div class="lesson-nav">
+                    <button class="nav-btn active" data-lesson="builder">和弦建構器</button>
+                    <button class="nav-btn" data-lesson="inversions">和弦轉位</button>
+                    <button class="nav-btn" data-lesson="circle">五度圓</button>
+                </div>
+
+                <div class="lesson-content" id="lesson-content">
+                    <!-- 內容將由 JavaScript 動態生成 -->
+                </div>
+            </div>
+
+            <div class="right-panel" id="piano-container">
+                <!-- Piano component will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="piano-component.js"></script>
+    <script>
+        const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const chordTypes = {
+            'major': { name: '大三和弦', intervals: [0, 4, 7] },
+            'minor': { name: '小三和弦', intervals: [0, 3, 7] },
+            'dim': { name: '減三和弦', intervals: [0, 3, 6] },
+            'aug': { name: '增三和弦', intervals: [0, 4, 8] },
+            'maj7': { name: '大七和弦', intervals: [0, 4, 7, 11] },
+            'min7': { name: '小七和弦', intervals: [0, 3, 7, 10] },
+            'dom7': { name: '屬七和弦', intervals: [0, 4, 7, 10] }
+        };
+
+        const intervalNames = ['根音', '小二度', '大二度', '小三度', '大三度', '完全四度', '增四度', '完全五度', '小六度', '大六度', '小七度', '大七度'];
+        const circleKeys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F'];
+
+        let audioContext;
+        let selectedRoot = 'C';
+        let selectedType = 'major';
+        let currentLesson = 'builder';
+        let pianoComponent;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+        function getNoteFrequency(note, octave = 4) {
+            const noteIndex = notes.indexOf(note);
+            const baseFreq = 440 * Math.pow(2, (noteIndex - 9) / 12);
+            return baseFreq * Math.pow(2, octave - 4);
+        }
+
+        function playChord(root, type, inversion = 0) {
+            if (!audioContext) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const chordType = chordTypes[type];
+            const rootIndex = notes.indexOf(root);
+
+            let chordNotes = chordType.intervals.map(interval => {
+                const noteIndex = (rootIndex + interval) % 12;
+                return notes[noteIndex];
+            });
+
+            // 應用轉位
+            for (let i = 0; i < inversion; i++) {
+                const bottomNote = chordNotes.shift();
+                chordNotes.push(bottomNote);
+            }
+
+            chordNotes.forEach((note, index) => {
+                setTimeout(() => {
+                    const octave = 4 + Math.floor(index / 12);
+                    const freq = getNoteFrequency(note, octave);
+
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 2);
+                }, index * 100);
+            });
+        }
+
+        function renderBuilderLesson() {
+            return `
+                <div class="lesson-title">和弦建構器</div>
+                <div class="chord-builder">
+                    <div class="builder-section">
+                        <div class="section-title">選擇根音</div>
+                        <div class="note-selector" id="note-selector">
+                            ${notes.map(note => `
+                                <button class="note-btn ${note === selectedRoot ? 'selected' : ''}"
+                                        data-note="${note}" onclick="selectRoot('${note}')">${note}</button>
+                            `).join('')}
+                        </div>
+
+                        <div class="section-title">選擇和弦類型</div>
+                        <div class="chord-type-selector">
+                            ${Object.entries(chordTypes).map(([type, data]) => `
+                                <button class="type-btn ${type === selectedType ? 'selected' : ''}"
+                                        data-type="${type}" onclick="selectType('${type}')">${data.name}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="builder-section">
+                        <div class="chord-analysis">
+                            <div class="chord-display" id="chord-display">${selectedRoot}${selectedType === 'major' ? '' : chordTypes[selectedType].name}</div>
+
+                            <div class="interval-analysis" id="interval-analysis">
+                                <!-- 音程分析將由 JavaScript 生成 -->
+                            </div>
+
+                            <button class="play-chord-btn" onclick="playChordAndUpdate('${selectedRoot}', '${selectedType}')">播放和弦</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderInversionsLesson() {
+            const chordType = chordTypes[selectedType];
+            const rootIndex = notes.indexOf(selectedRoot);
+
+            return `
+                <div class="lesson-title">和弦轉位 - ${selectedRoot}${selectedType === 'major' ? '' : chordType.name}</div>
+
+                <div class="inversion-section">
+                    <div class="inversion-cards">
+                        ${chordType.intervals.map((_, index) => {
+                            const inversionName = index === 0 ? '原位' : `第${index}轉位`;
+                            const chordNotes = chordType.intervals.map(interval => {
+                                const noteIndex = (rootIndex + interval) % 12;
+                                return notes[noteIndex];
+                            });
+
+                            // 計算轉位後的音符
+                            const invertedNotes = [...chordNotes];
+                            for (let i = 0; i < index; i++) {
+                                const bottomNote = invertedNotes.shift();
+                                invertedNotes.push(bottomNote);
+                            }
+
+                            return `
+                                <div class="inversion-card" onclick="playInversion(${index})">
+                                    <div class="inversion-name">${inversionName}</div>
+                                    <div class="inversion-notes">${invertedNotes.join(' - ')}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCircleLesson() {
+            return `
+                <div class="lesson-title">五度圓</div>
+                <div class="circle-of-fifths" id="circle-of-fifths">
+                    <!-- 五度圓將由 JavaScript 生成 -->
+                </div>
+                <div style="text-align: center; margin-top: 1rem; opacity: 0.8;">
+                    點擊圓圈上的調性來探索該調的主和弦
+                </div>
+            `;
+        }
+
+        function updateIntervalAnalysis() {
+            const chordType = chordTypes[selectedType];
+            const rootIndex = notes.indexOf(selectedRoot);
+            const analysisDiv = document.getElementById('interval-analysis');
+
+            if (analysisDiv) {
+                analysisDiv.innerHTML = chordType.intervals.map(interval => {
+                    const noteIndex = (rootIndex + interval) % 12;
+                    const noteName = notes[noteIndex];
+                    const intervalName = intervalNames[interval];
+
+                    return `
+                        <div class="interval-card">
+                            <div class="interval-name">${intervalName}</div>
+                            <div class="interval-note">${noteName}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderCircleOfFifths() {
+            const circle = document.getElementById('circle-of-fifths');
+            if (!circle) return;
+
+            circle.innerHTML = '';
+            const radius = 120;
+            const centerX = 150;
+            const centerY = 150;
+
+            circleKeys.forEach((key, index) => {
+                const angle = (index * 30 - 90) * Math.PI / 180;
+                const x = centerX + radius * Math.cos(angle) - 20;
+                const y = centerY + radius * Math.sin(angle) - 20;
+
+                const keyPoint = document.createElement('div');
+                keyPoint.className = 'key-point';
+                keyPoint.textContent = key;
+                keyPoint.style.left = x + 'px';
+                keyPoint.style.top = y + 'px';
+                keyPoint.onclick = () => selectCircleKey(key);
+
+                circle.appendChild(keyPoint);
+            });
+        }
+
+        function selectRoot(note) {
+            selectedRoot = note;
+            updateLesson();
+            updatePianoDisplay();
+        }
+
+        function selectType(type) {
+            selectedType = type;
+            updateLesson();
+            updatePianoDisplay();
+        }
+
+        function updatePianoDisplay() {
+            const chordSymbol = `${selectedRoot}${selectedType === 'major' ? '' : selectedType}`;
+            const chordType = chordTypes[selectedType];
+            const rootIndex = notes.indexOf(selectedRoot);
+
+            // 計算和弦音符
+            const chordNotes = chordType.intervals.map(interval => {
+                const noteIndex = (rootIndex + interval) % 12;
+                return notes[noteIndex];
+            });
+
+            pianoComponent.updateChord(chordSymbol, chordNotes);
+        }
+
+        function playChordAndUpdate(root, type) {
+            playChord(root, type);
+            updatePianoDisplay();
+        }
+
+        function selectCircleKey(key) {
+            document.querySelectorAll('.key-point').forEach(point => {
+                point.classList.remove('selected');
+            });
+
+            event.target.classList.add('selected');
+
+            // 播放該調的主和弦
+            playChord(key, 'major');
+        }
+
+        function playInversion(inversionIndex) {
+            document.querySelectorAll('.inversion-card').forEach(card => {
+                card.classList.remove('playing');
+            });
+
+            event.target.classList.add('playing');
+
+            setTimeout(() => {
+                event.target.classList.remove('playing');
+            }, 2000);
+
+            playChord(selectedRoot, selectedType, inversionIndex);
+        }
+
+        function switchLesson(lesson) {
+            currentLesson = lesson;
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.querySelector(`[data-lesson="${lesson}"]`).classList.add('active');
+
+            updateLesson();
+        }
+
+        function updateLesson() {
+            const content = document.getElementById('lesson-content');
+
+            switch (currentLesson) {
+                case 'builder':
+                    content.innerHTML = renderBuilderLesson();
+                    setTimeout(updateIntervalAnalysis, 100);
+                    break;
+                case 'inversions':
+                    content.innerHTML = renderInversionsLesson();
+                    break;
+                case 'circle':
+                    content.innerHTML = renderCircleLesson();
+                    setTimeout(renderCircleOfFifths, 100);
+                    break;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+
+            // 初始化鋼琴元件
+            pianoComponent = new PianoComponent('piano-container', {
+                audioContext: audioContext
+            });
+
+            updateLesson();
+            updatePianoDisplay();
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchLesson(btn.dataset.lesson);
+                });
+            });
+        });
+
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>

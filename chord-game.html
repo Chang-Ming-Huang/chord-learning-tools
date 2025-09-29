@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和弦聽力訓練遊戲</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1e293b;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .left-panel {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            background: #475569;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-section {
+            text-align: center;
+        }
+
+        .score {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .level-section {
+            text-align: center;
+        }
+
+        .level {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .streak-section {
+            text-align: center;
+        }
+
+        .streak {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #ffa726;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .challenge-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .play-chord-btn {
+            background: #ea580c;
+            border: none;
+            color: white;
+            padding: 1.5rem 3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        }
+
+        .play-chord-btn:hover {
+            background: #c2410c;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(194, 65, 12, 0.4);
+        }
+
+        .play-chord-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            color: #fff;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background: rgba(76, 175, 80, 0.8);
+            border-color: #4caf50;
+            animation: correctPulse 0.6s ease;
+        }
+
+        .option-btn.incorrect {
+            background: rgba(244, 67, 54, 0.8);
+            border-color: #f44336;
+            animation: incorrectShake 0.6s ease;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .feedback {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+            min-height: 1.5rem;
+        }
+
+        .feedback.correct {
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            color: #f44336;
+        }
+
+        .next-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 25px;
+            color: #fff;
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .next-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-btn {
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 15px;
+            color: #fff;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .control-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .achievements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .achievement {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+        }
+
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .game-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div class="left-panel">
+                <h1 class="title">和弦聽力訓練遊戲</h1>
+
+                <div class="game-header">
+                    <div class="score-section">
+                        <div class="score" id="score">0</div>
+                        <div class="score-label">分數</div>
+                    </div>
+                    <div class="level-section">
+                        <div class="level" id="level">1</div>
+                        <div class="score-label">等級</div>
+                    </div>
+                    <div class="streak-section">
+                        <div class="streak" id="streak">0</div>
+                        <div class="score-label">連續答對</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+
+                <div class="game-area">
+                    <div class="challenge-title" id="challenge-title">聽聽這個和弦，猜猜它是什麼類型？</div>
+
+                    <button class="play-chord-btn" id="play-btn" onclick="playCurrentChord()">🎵 播放和弦</button>
+
+                    <div class="options-grid" id="options-grid">
+                        <!-- 選項將由 JavaScript 生成 -->
+                    </div>
+
+                    <div class="feedback" id="feedback"></div>
+
+                    <button class="next-btn" id="next-btn" onclick="nextChallenge()" style="display: none;">下一題</button>
+                </div>
+
+                <div class="game-controls">
+                    <button class="control-btn" onclick="resetGame()">重新開始</button>
+                    <button class="control-btn" onclick="skipChallenge()">跳過此題</button>
+                    <button class="control-btn" onclick="toggleHint()">提示</button>
+                </div>
+
+                <div class="achievements">
+                    <div class="achievement" data-achievement="first-correct">
+                        <div class="achievement-icon">🎯</div>
+                        <div class="achievement-name">初次正確</div>
+                    </div>
+                    <div class="achievement" data-achievement="streak-5">
+                        <div class="achievement-icon">🔥</div>
+                        <div class="achievement-name">連對5題</div>
+                    </div>
+                    <div class="achievement" data-achievement="level-5">
+                        <div class="achievement-icon">⭐</div>
+                        <div class="achievement-name">達到等級5</div>
+                    </div>
+                    <div class="achievement" data-achievement="perfect-round">
+                        <div class="achievement-icon">💎</div>
+                        <div class="achievement-name">完美一輪</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="piano-container">
+                <!-- Piano component will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="piano-component.js"></script>
+    <script>
+        const notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+        const chordTypes = {
+            'major': { name: '大三和弦', intervals: [0, 4, 7] },
+            'minor': { name: '小三和弦', intervals: [0, 3, 7] },
+            'dim': { name: '減三和弦', intervals: [0, 3, 6] },
+            'aug': { name: '增三和弦', intervals: [0, 4, 8] },
+            'maj7': { name: '大七和弦', intervals: [0, 4, 7, 11] },
+            'min7': { name: '小七和弦', intervals: [0, 3, 7, 10] },
+            'dom7': { name: '屬七和弦', intervals: [0, 4, 7, 10] }
+        };
+
+        let audioContext;
+        let pianoComponent;
+        let gameState = {
+            score: 0,
+            level: 1,
+            streak: 0,
+            currentChord: null,
+            currentOptions: [],
+            answered: false,
+            questionsInLevel: 0,
+            correctInLevel: 0,
+            achievements: new Set()
+        };
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+        function getNoteFrequency(note, octave = 4) {
+            const noteMap = { 'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11 };
+            const baseFreq = 440 * Math.pow(2, (noteMap[note] - 9) / 12);
+            return baseFreq * Math.pow(2, octave - 4);
+        }
+
+        function playChord(root, type) {
+            if (!audioContext) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            const chordType = chordTypes[type];
+            const rootIndex = notes.indexOf(root);
+
+            chordType.intervals.forEach((interval, index) => {
+                setTimeout(() => {
+                    const noteIndex = (rootIndex + Math.floor(interval / 12)) % 7;
+                    const note = notes[noteIndex];
+                    const octave = 4 + Math.floor(interval / 12);
+                    const freq = getNoteFrequency(note, octave) * Math.pow(2, (interval % 12) / 12);
+
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.1);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 2);
+                }, index * 100);
+            });
+        }
+
+        function generateChallenge() {
+            const availableTypes = Object.keys(chordTypes).slice(0, Math.min(2 + gameState.level, Object.keys(chordTypes).length));
+            const randomRoot = notes[Math.floor(Math.random() * notes.length)];
+            const randomType = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+
+            gameState.currentChord = { root: randomRoot, type: randomType };
+
+            // 更新鋼琴顯示
+            const chordSymbol = `${randomRoot}${randomType === 'major' ? '' : randomType}`;
+            const chordType = chordTypes[randomType];
+
+            // 計算和弦音符
+            const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const rootIndex = allNotes.indexOf(randomRoot);
+            const chordNotes = chordType.intervals.map(interval => {
+                const noteIndex = (rootIndex + interval) % 12;
+                return allNotes[noteIndex];
+            });
+
+            pianoComponent.updateChord(chordSymbol, chordNotes);
+
+            // 生成選項（包含正確答案和干擾項）
+            const correctAnswer = randomType;
+            const wrongAnswers = availableTypes.filter(type => type !== correctAnswer);
+
+            // 隨機選擇2-3個干擾項
+            const numWrongAnswers = Math.min(3, wrongAnswers.length);
+            const selectedWrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, numWrongAnswers);
+
+            gameState.currentOptions = [correctAnswer, ...selectedWrongAnswers].sort(() => 0.5 - Math.random());
+
+            renderOptions();
+            gameState.answered = false;
+
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('play-btn').disabled = false;
+        }
+
+        function renderOptions() {
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            gameState.currentOptions.forEach(type => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = chordTypes[type].name;
+                button.onclick = () => selectAnswer(type);
+                button.dataset.type = type;
+                optionsGrid.appendChild(button);
+            });
+        }
+
+        function playCurrentChord() {
+            if (gameState.currentChord) {
+                playChord(gameState.currentChord.root, gameState.currentChord.type);
+            }
+        }
+
+        function selectAnswer(selectedType) {
+            if (gameState.answered) return;
+
+            gameState.answered = true;
+            const correctType = gameState.currentChord.type;
+            const isCorrect = selectedType === correctType;
+
+            // 禁用所有選項按鈕
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.dataset.type === correctType) {
+                    btn.classList.add('correct');
+                } else if (btn.dataset.type === selectedType && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+
+            const feedback = document.getElementById('feedback');
+
+            if (isCorrect) {
+                gameState.score += 10 * gameState.level;
+                gameState.streak++;
+                gameState.correctInLevel++;
+
+                feedback.textContent = '正確！🎉';
+                feedback.className = 'feedback correct';
+
+                checkAchievements();
+            } else {
+                gameState.streak = 0;
+                feedback.textContent = `錯誤！正確答案是：${chordTypes[correctType].name}`;
+                feedback.className = 'feedback incorrect';
+            }
+
+            gameState.questionsInLevel++;
+            updateDisplay();
+
+            // 檢查是否升級
+            if (gameState.questionsInLevel >= 5 && gameState.correctInLevel >= 3) {
+                levelUp();
+            }
+
+            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('play-btn').disabled = true;
+        }
+
+        function levelUp() {
+            gameState.level++;
+            gameState.questionsInLevel = 0;
+            gameState.correctInLevel = 0;
+
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = `升級！現在是等級 ${gameState.level}！`;
+            feedback.className = 'feedback correct';
+
+            checkAchievements();
+        }
+
+        function checkAchievements() {
+            const achievements = [
+                { id: 'first-correct', condition: () => gameState.score > 0 },
+                { id: 'streak-5', condition: () => gameState.streak >= 5 },
+                { id: 'level-5', condition: () => gameState.level >= 5 },
+                { id: 'perfect-round', condition: () => gameState.correctInLevel === 5 && gameState.questionsInLevel === 5 }
+            ];
+
+            achievements.forEach(achievement => {
+                if (!gameState.achievements.has(achievement.id) && achievement.condition()) {
+                    gameState.achievements.add(achievement.id);
+                    unlockAchievement(achievement.id);
+                }
+            });
+        }
+
+        function unlockAchievement(achievementId) {
+            const achievementElement = document.querySelector(`[data-achievement="${achievementId}"]`);
+            if (achievementElement) {
+                achievementElement.classList.add('unlocked');
+
+                // 顯示解鎖通知
+                setTimeout(() => {
+                    alert(`🏆 成就解鎖：${achievementElement.querySelector('.achievement-name').textContent}！`);
+                }, 500);
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('streak').textContent = gameState.streak;
+
+            const progress = (gameState.questionsInLevel / 5) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+
+        function nextChallenge() {
+            generateChallenge();
+        }
+
+        function skipChallenge() {
+            if (!gameState.answered) {
+                gameState.streak = 0;
+                gameState.questionsInLevel++;
+                updateDisplay();
+            }
+            generateChallenge();
+        }
+
+        function resetGame() {
+            gameState = {
+                score: 0,
+                level: 1,
+                streak: 0,
+                currentChord: null,
+                currentOptions: [],
+                answered: false,
+                questionsInLevel: 0,
+                correctInLevel: 0,
+                achievements: new Set()
+            };
+
+            document.querySelectorAll('.achievement').forEach(achievement => {
+                achievement.classList.remove('unlocked');
+            });
+
+            updateDisplay();
+            generateChallenge();
+        }
+
+        function toggleHint() {
+            if (!gameState.currentChord || gameState.answered) return;
+
+            const hintText = `這個和弦的根音是：${gameState.currentChord.root}`;
+            alert(hintText);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+
+            // 初始化鋼琴元件
+            pianoComponent = new PianoComponent('piano-container', {
+                audioContext: audioContext
+            });
+
+            generateChallenge();
+            updateDisplay();
+        });
+
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
