@@ -244,7 +244,37 @@ class PianoComponent {
 
     updateChord(chordSymbol, customNotes = null) {
         this.displayChordInfo(chordSymbol, customNotes);
-        this.highlightChordKeys(chordSymbol);
+
+        if (customNotes) {
+            // 使用自定義音符進行高亮
+            this.highlightCustomNotes(customNotes);
+        } else {
+            // 使用預設和弦字典進行高亮
+            this.highlightChordKeys(chordSymbol);
+        }
+    }
+
+    highlightCustomNotes(notes) {
+        // 清除之前的高亮
+        this.container.querySelectorAll('.white-key, .black-key').forEach(key => {
+            key.classList.remove('highlighted');
+        });
+
+        notes.forEach(noteName => {
+            // 處理降記號映射到升記號
+            const mappedNote = this.keyMapping[noteName] || noteName;
+
+            // 找到匹配的鍵（可能在多個八度）
+            this.keyLayout.forEach(key => {
+                const keyNote = key.note.replace(/[45]/, ''); // 移除八度數字
+                if (keyNote === mappedNote || key.label === mappedNote) {
+                    const keyElement = this.container.querySelector(`[data-note="${key.note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.add('highlighted');
+                    }
+                }
+            });
+        });
     }
 
     clearHighlight() {
