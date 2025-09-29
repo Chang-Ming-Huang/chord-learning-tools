@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和弦學習工具集</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1e293b;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .tool-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tool-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ea580c;
+        }
+
+        .tool-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .features {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .features h2 {
+            color: #ea580c;
+            margin-bottom: 1rem;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .feature-item::before {
+            content: "🎹";
+            margin-right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">和弦學習工具集</h1>
+        <p class="subtitle">互動式音樂學習平台，配備鋼琴視覺化與現代化介面設計</p>
+
+        <div class="tools-grid">
+            <a href="chord-progression.html" class="tool-card">
+                <h3>🎼 和弦進行練習器</h3>
+                <p>學習經典和弦進行模式，包含 vi-IV-I-V、I-V-vi-IV 等流行音樂常用進行。配合即時鋼琴視覺化，讓和弦學習更直觀有效。</p>
+            </a>
+
+            <a href="chord-theory.html" class="tool-card">
+                <h3>📚 互動式和弦理論</h3>
+                <p>深入探索和弦建構原理、轉位技巧與五度圓理論。透過互動式介面學習音程關係，掌握和弦的內在結構與變化。</p>
+            </a>
+
+            <a href="chord-game.html" class="tool-card">
+                <h3>🎮 和弦聽力訓練遊戲</h3>
+                <p>通過遊戲化的方式提升和弦識別能力。漸進式難度設計，成就系統激勵學習，讓聽力訓練變得有趣且高效。</p>
+            </a>
+        </div>
+
+        <div class="features">
+            <h2>平台特色</h2>
+            <div class="features-list">
+                <div class="feature-item">統一的左右分割版面設計</div>
+                <div class="feature-item">即時鋼琴鍵盤視覺化</div>
+                <div class="feature-item">Web Audio API 音頻合成</div>
+                <div class="feature-item">現代灰藍配色方案</div>
+                <div class="feature-item">響應式設計支援</div>
+                <div class="feature-item">純前端實作，無需後端</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
