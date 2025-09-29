@@ -586,8 +586,22 @@
 
             event.target.classList.add('selected');
 
-            // 播放該調的主和弦
+            // 播放該調的主和弦並更新鋼琴顯示
             playChord(key, 'major');
+
+            // 更新鋼琴顯示
+            const chordSymbol = key;
+            const chordNotes = ['C', 'E', 'G']; // 預設大三和弦
+            if (key !== 'C') {
+                const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const rootIndex = allNotes.indexOf(key);
+                const intervals = [0, 4, 7]; // 大三和弦音程
+                chordNotes = intervals.map(interval => {
+                    const noteIndex = (rootIndex + interval) % 12;
+                    return allNotes[noteIndex];
+                });
+            }
+            pianoComponent.updateChord(chordSymbol, chordNotes);
         }
 
         function playInversion(inversionIndex) {
@@ -602,6 +616,25 @@
             }, 2000);
 
             playChord(selectedRoot, selectedType, inversionIndex);
+
+            // 更新鋼琴顯示（轉位）
+            const chordType = chordTypes[selectedType];
+            const allNotes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            const rootIndex = allNotes.indexOf(selectedRoot);
+
+            let chordNotes = chordType.intervals.map(interval => {
+                const noteIndex = (rootIndex + interval) % 12;
+                return allNotes[noteIndex];
+            });
+
+            // 應用轉位
+            for (let i = 0; i < inversionIndex; i++) {
+                const bottomNote = chordNotes.shift();
+                chordNotes.push(bottomNote);
+            }
+
+            const chordSymbol = `${selectedRoot}${selectedType === 'major' ? '' : selectedType} (${inversionIndex === 0 ? '原位' : `第${inversionIndex}轉位`})`;
+            pianoComponent.updateChord(chordSymbol, chordNotes);
         }
 
         function switchLesson(lesson) {
