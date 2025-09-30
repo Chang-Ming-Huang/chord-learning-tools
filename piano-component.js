@@ -94,6 +94,12 @@ class PianoComponent {
                 box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
             }
 
+            .white-key.active {
+                background: linear-gradient(to bottom, #10b981 0%, #059669 100%);
+                color: #fff;
+                transform: scale(0.98);
+            }
+
             .black-key {
                 width: 25px;
                 height: 120px;
@@ -120,6 +126,11 @@ class PianoComponent {
             .black-key.highlighted {
                 background: linear-gradient(to bottom, #ea580c 0%, #c2410c 100%);
                 box-shadow: 0 0 15px rgba(234, 88, 12, 0.4);
+            }
+
+            .black-key.active {
+                background: linear-gradient(to bottom, #10b981 0%, #059669 100%);
+                transform: scale(0.98);
             }
 
             .current-chord-info {
@@ -189,6 +200,16 @@ class PianoComponent {
 
             // 添加點擊事件
             keyElement.addEventListener('click', () => {
+                // 播放音符
+                this.playNote(key);
+
+                // 視覺反饋：短暫高亮
+                keyElement.classList.add('active');
+                setTimeout(() => {
+                    keyElement.classList.remove('active');
+                }, 200);
+
+                // 觸發回調（如果有）
                 if (this.onKeyClick) {
                     this.onKeyClick(key);
                 }
@@ -281,6 +302,60 @@ class PianoComponent {
         this.container.querySelectorAll('.white-key, .black-key').forEach(key => {
             key.classList.remove('highlighted');
         });
+    }
+
+    getNoteFrequency(noteName) {
+        // 音符名稱格式：'C4', 'D#5' 等
+        const noteMap = {
+            'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+            'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
+        };
+
+        // 解析音符和八度
+        const match = noteName.match(/^([A-G]#?)(\d)$/);
+        if (!match) return 440; // 預設返回 A4
+
+        const note = match[1];
+        const octave = parseInt(match[2]);
+
+        // A4 = 440 Hz 為基準
+        const semitoneOffset = noteMap[note] - 9; // A 是第 9 個半音
+        const octaveOffset = octave - 4;
+
+        // 計算頻率：f = 440 * 2^(n/12)，n 是相對於 A4 的半音數
+        const totalOffset = octaveOffset * 12 + semitoneOffset;
+        return 440 * Math.pow(2, totalOffset / 12);
+    }
+
+    playNote(key) {
+        // 檢查 audioContext 是否存在
+        if (!this.audioContext) return;
+
+        // 確保 audioContext 已啟動
+        if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+
+        const frequency = this.getNoteFrequency(key.note);
+
+        // 創建音頻節點
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+
+        // 音量包絡（淡入淡出）
+        const now = this.audioContext.currentTime;
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+        oscillator.start(now);
+        oscillator.stop(now + 0.5);
     }
 }
 

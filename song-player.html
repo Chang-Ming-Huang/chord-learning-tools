@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歌曲播放器 - 學習流行歌曲和弦</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1e293b;
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 60% 40%;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .left-panel {
+            padding: 1.2rem;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            background: #475569;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .song-selector {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .song-btn {
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 12px;
+            color: #fff;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .song-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .song-btn.active {
+            background: #ea580c;
+            border-color: #c2410c;
+        }
+
+        .song-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .song-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .song-artist {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .song-meta {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #64748b;
+            border: 2px solid #475569;
+            border-radius: 15px;
+            color: #fff;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            min-width: 80px;
+        }
+
+        .control-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.play {
+            background: #ea580c;
+            border-color: #c2410c;
+        }
+
+        .control-btn.play:hover {
+            background: #c2410c;
+        }
+
+        .control-btn.playing {
+            background: #10b981;
+            border-color: #059669;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .speed-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .speed-slider {
+            width: 150px;
+        }
+
+        .progress-section {
+            margin-bottom: 1rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ea580c, #10b981);
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 4px;
+        }
+
+        .chord-timeline {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            text-align: center;
+        }
+
+        .chord-section {
+            margin-bottom: 1rem;
+        }
+
+        .section-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .chord-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chord-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .chord-card.current {
+            background: #ea580c;
+            border-color: #c2410c;
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(234, 88, 12, 0.4);
+        }
+
+        .chord-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .chord-beats {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-top: 0.2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-layout">
+            <div class="left-panel">
+                <h1 class="title">歌曲播放器</h1>
+
+                <div class="song-selector">
+                    <button class="song-btn active" data-song="someone-like-you">Someone Like You</button>
+                    <button class="song-btn" data-song="simple-love">簡單愛</button>
+                </div>
+
+                <div class="song-info">
+                    <div class="song-title" id="song-title">Someone Like You</div>
+                    <div class="song-artist" id="song-artist">Adele</div>
+                    <div class="song-meta">
+                        <span id="song-bpm">BPM: 65</span>
+                        <span id="song-key">Key: A Major</span>
+                        <span id="song-time">4/4</span>
+                    </div>
+                </div>
+
+                <div class="player-controls">
+                    <button class="control-btn play" id="play-btn">播放</button>
+                    <button class="control-btn" id="pause-btn">暫停</button>
+                    <button class="control-btn" id="stop-btn">停止</button>
+                </div>
+
+                <div class="speed-control">
+                    <span class="speed-label">速度：</span>
+                    <input type="range" class="speed-slider" id="speed-slider" min="50" max="150" value="100" step="5">
+                    <span class="speed-label" id="speed-value">100%</span>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span id="current-time">0:00</span>
+                        <span id="total-time">0:00</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="chord-timeline">
+                    <div class="timeline-title">和弦進行時間軸</div>
+                    <div id="chord-timeline-content">
+                        <!-- 和弦卡片將由 JavaScript 生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel" id="piano-container">
+                <!-- Piano component will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="piano-component.js"></script>
+    <script src="beat-scheduler.js"></script>
+    <script src="song-data.js"></script>
+    <script>
+        let audioContext;
+        let scheduler;
+        let chordPlayer;
+        let pianoComponent;
+        let currentSong = 'someone-like-you';
+        let isPlaying = false;
+        let animationFrameId;
+        let originalBPM = 65;
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (error) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+        function loadSong(songId) {
+            currentSong = songId;
+            const songData = songLibrary[songId];
+
+            // 更新歌曲資訊
+            document.getElementById('song-title').textContent = songData.title;
+            document.getElementById('song-artist').textContent = songData.artist;
+            document.getElementById('song-bpm').textContent = `BPM: ${songData.bpm}`;
+            document.getElementById('song-key').textContent = `Key: ${songData.key}`;
+            document.getElementById('song-time').textContent = songData.timeSignature;
+
+            originalBPM = songData.bpm;
+
+            // 計算總時長
+            const duration = getSongDuration(songData);
+            document.getElementById('total-time').textContent = formatTime(duration);
+
+            // 生成和弦時間軸
+            renderChordTimeline(songData);
+
+            // 重置播放器
+            if (scheduler) {
+                scheduler.stop();
+            }
+
+            // 創建新的調度器和播放器
+            scheduler = new BeatScheduler(audioContext, songData.bpm);
+            chordPlayer = new ChordPlayer(audioContext, scheduler);
+            chordPlayer.setChordSequence(songData.chordSequence);
+
+            // 設置和弦改變回調
+            chordPlayer.setOnChordChange((chordSymbol, chordIndex, beatNumber) => {
+                // 更新鋼琴顯示
+                const chordNotes = songData.chordNotes[chordSymbol] || ['C', 'E', 'G'];
+                pianoComponent.updateChord(chordSymbol, chordNotes);
+
+                // 高亮當前和弦卡片
+                document.querySelectorAll('.chord-card').forEach((card, index) => {
+                    card.classList.toggle('current', index === chordIndex);
+                });
+            });
+
+            isPlaying = false;
+            updatePlayButton();
+        }
+
+        function renderChordTimeline(songData) {
+            const container = document.getElementById('chord-timeline-content');
+            container.innerHTML = '';
+
+            let currentSection = '';
+            let sectionDiv = null;
+            let cardsDiv = null;
+
+            songData.chordSequence.forEach((chordInfo, index) => {
+                if (chordInfo.section !== currentSection) {
+                    currentSection = chordInfo.section;
+
+                    sectionDiv = document.createElement('div');
+                    sectionDiv.className = 'chord-section';
+
+                    const sectionName = document.createElement('div');
+                    sectionName.className = 'section-name';
+                    sectionName.textContent = chordInfo.section;
+
+                    cardsDiv = document.createElement('div');
+                    cardsDiv.className = 'chord-cards';
+
+                    sectionDiv.appendChild(sectionName);
+                    sectionDiv.appendChild(cardsDiv);
+                    container.appendChild(sectionDiv);
+                }
+
+                const card = document.createElement('div');
+                card.className = 'chord-card';
+                card.innerHTML = `
+                    <div class="chord-name">${chordInfo.chord}</div>
+                    <div class="chord-beats">${chordInfo.beats} 拍</div>
+                `;
+
+                cardsDiv.appendChild(card);
+            });
+        }
+
+        function play() {
+            if (!audioContext || isPlaying) return;
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            chordPlayer.start();
+            isPlaying = true;
+            updatePlayButton();
+
+            // 啟動進度更新
+            updateProgress();
+        }
+
+        function pause() {
+            if (!isPlaying) return;
+
+            chordPlayer.pause();
+            isPlaying = false;
+            updatePlayButton();
+
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        }
+
+        function stop() {
+            chordPlayer.stop();
+            isPlaying = false;
+            updatePlayButton();
+
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+
+            // 重置 UI
+            document.getElementById('progress-fill').style.width = '0%';
+            document.getElementById('current-time').textContent = '0:00';
+            document.querySelectorAll('.chord-card').forEach(card => {
+                card.classList.remove('current');
+            });
+
+            // 重置鋼琴顯示
+            const songData = songLibrary[currentSong];
+            const firstChord = songData.chordSequence[0].chord;
+            const firstChordNotes = songData.chordNotes[firstChord];
+            pianoComponent.updateChord(firstChord, firstChordNotes);
+        }
+
+        function updatePlayButton() {
+            const playBtn = document.getElementById('play-btn');
+            if (isPlaying) {
+                playBtn.textContent = '播放中...';
+                playBtn.classList.add('playing');
+            } else {
+                playBtn.textContent = '播放';
+                playBtn.classList.remove('playing');
+            }
+        }
+
+        function updateProgress() {
+            if (!isPlaying) return;
+
+            const songData = songLibrary[currentSong];
+            const totalBeats = getTotalBeats(songData);
+            const currentBeat = scheduler.getCurrentBeat();
+
+            // 更新進度條
+            const progress = Math.min((currentBeat / totalBeats) * 100, 100);
+            document.getElementById('progress-fill').style.width = progress + '%';
+
+            // 更新時間顯示
+            const elapsedTime = currentBeat * scheduler.secondsPerBeat;
+            document.getElementById('current-time').textContent = formatTime(elapsedTime);
+
+            // 檢查是否播放完畢
+            if (currentBeat >= totalBeats) {
+                stop();
+                return;
+            }
+
+            animationFrameId = requestAnimationFrame(updateProgress);
+        }
+
+        function changeSpeed() {
+            const speedSlider = document.getElementById('speed-slider');
+            const speedPercent = parseInt(speedSlider.value);
+            document.getElementById('speed-value').textContent = speedPercent + '%';
+
+            const newBPM = (originalBPM * speedPercent) / 100;
+            scheduler.setBPM(newBPM);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+
+            // 初始化鋼琴元件
+            pianoComponent = new PianoComponent('piano-container', {
+                audioContext: audioContext
+            });
+
+            // 載入預設歌曲
+            loadSong('someone-like-you');
+
+            // 歌曲選擇器
+            document.querySelectorAll('.song-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.song-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    stop();
+                    loadSong(btn.dataset.song);
+                });
+            });
+
+            // 播放控制
+            document.getElementById('play-btn').addEventListener('click', play);
+            document.getElementById('pause-btn').addEventListener('click', pause);
+            document.getElementById('stop-btn').addEventListener('click', stop);
+
+            // 速度控制
+            document.getElementById('speed-slider').addEventListener('input', changeSpeed);
+        });
+
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
